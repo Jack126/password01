@@ -16,6 +16,7 @@ class Application(tornado.web.Application):
         handlers = [
             # 设置路由
             (r"/", HomeHandler),
+            (r"/test",TestHandler),
         ]
         settings = dict(  # 配置
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
@@ -40,6 +41,12 @@ class HomeHandler(webBase.BaseHandler):
 
         self.render("index.html", entries="hello", data=self.db.get("select * from users where id='2'"), list=list1)
 
+class TestHandler(webBase.BaseHandler):
+    @gen.coroutine
+    def get(self):
+        self.session['name'] = 'jack'
+
+        print(self.session['name'])
 
 def main():
     tornado.options.parse_command_line()

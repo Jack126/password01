@@ -10,9 +10,9 @@ conn = database.Connection("password01.db")
 #
 # create a table and insert sample data
 #
-#conn.execute('create table users (id integer, name char(10));')
-#conn.execute('insert into  users (id, name) values (1, "jack");')
-#conn.execute('insert into  users (id, name) values (2, "jill");')
+conn.execute('create table users (id integer, name char(10));')
+conn.execute('insert into  users (id, name) values (1, "jack");')
+conn.execute('insert into  users (id, name) values (2, "jill");')
 
 #
 # retrieve each row as a dictionary

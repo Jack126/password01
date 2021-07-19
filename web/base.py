@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import tornado.web
-
+import libs.session as sSession
 #基础handler，主要负责检查sqlite的数据库链接。
 
 
 class BaseHandler(tornado.web.RequestHandler):
+
+    def initialize(self):
+        self.session = sSession(self)
+
     @property
     def db(self):
         try:
