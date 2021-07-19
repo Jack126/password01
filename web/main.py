@@ -8,7 +8,6 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.options
 import web.base as webBase
-import libs.common as common
 import libs.database as database
 
 
@@ -28,17 +27,18 @@ class Application(tornado.web.Application):
         )
         super(Application, self).__init__(handlers, **settings)
         # Have one global connection to the blog DB across all handlers
-        self.db = database.Connection("password.db")
+        self.db = database.Connection("password01.db")
 
 
-# 首页handler。
+# 首页handler
 class HomeHandler(webBase.BaseHandler):
     @gen.coroutine
     def get(self):
-        sql = 'select * from test limit 1'
-        row = self.db.query(sql)
-        list = common.select(sql)
-        self.render("index.html", entries="hello", data=row, list=list)
+
+        sql1 = "select * from users"
+        list1 = self.db.query(sql1)
+
+        self.render("index.html", entries="hello", data=self.db.get("select * from users where id='2'"), list=list1)
 
 
 def main():
@@ -46,7 +46,6 @@ def main():
     http_server = tornado.httpserver.HTTPServer(Application())
     port = 9999
     http_server.listen(port)
-    tornado.options.options.logging = "debug"
     tornado.options.parse_command_line()
 
     tornado.ioloop.IOLoop.current().start()

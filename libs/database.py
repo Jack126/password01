@@ -85,7 +85,7 @@ class Connection(object):
         try:
             self._execute(cursor, query, parameters)
             column_names = [d[0] for d in cursor.description]
-            return [Row(itertools.izip(column_names, row)) for row in cursor]
+            return [Row(zip(column_names, row)) for row in cursor]
         finally:
             pass  # cursor.close()
 

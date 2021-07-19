@@ -6,7 +6,7 @@ import database
 #
 
 #conn = database.Connection(":memory:")  
-conn = database.Connection("test.db")
+conn = database.Connection("password01.db")
 #
 # create a table and insert sample data
 #
