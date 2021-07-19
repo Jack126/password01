@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os.path
-import torndb
 import tornado.escape
 from tornado import gen
 import tornado.httpserver
@@ -10,14 +9,14 @@ import tornado.ioloop
 import tornado.options
 import web.base as webBase
 import libs.common as common
-import web.dataTableHandler as dataTableHandler
+import libs.database as database
+
 
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             # 设置路由
             (r"/", HomeHandler),
-            (r"/stock", dataTableHandler.PostStockHandler),
         ]
         settings = dict(  # 配置
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
@@ -29,10 +28,7 @@ class Application(tornado.web.Application):
         )
         super(Application, self).__init__(handlers, **settings)
         # Have one global connection to the blog DB across all handlers
-        self.db = torndb.Connection(
-            charset="utf8", max_idle_time=3600, connect_timeout=1000,
-            host=common.MYSQL_HOST, database=common.MYSQL_DB,
-            user=common.MYSQL_USER, password=common.MYSQL_PWD)
+        self.db = database.Connection("password.db")
 
 
 # 首页handler。
@@ -42,7 +38,7 @@ class HomeHandler(webBase.BaseHandler):
         sql = 'select * from test limit 1'
         row = self.db.query(sql)
         list = common.select(sql)
-        self.render("index.html", entries="hello", data=row,list=list)
+        self.render("index.html", entries="hello", data=row, list=list)
 
 
 def main():
@@ -50,7 +46,7 @@ def main():
     http_server = tornado.httpserver.HTTPServer(Application())
     port = 9999
     http_server.listen(port)
-    # tornado.options.options.logging = "debug"
+    tornado.options.options.logging = "debug"
     tornado.options.parse_command_line()
 
     tornado.ioloop.IOLoop.current().start()
