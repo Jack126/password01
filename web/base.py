@@ -2,14 +2,18 @@
 # -*- coding: utf-8 -*-
 
 import tornado.web
-import libs.session as sSession
+from pycket.session import SessionMixin
 #基础handler，主要负责检查sqlite的数据库链接。
 
 
-class BaseHandler(tornado.web.RequestHandler):
-
+class BaseHandler(tornado.web.RequestHandler, SessionMixin):
     def initialize(self):
-        self.session = sSession(self)
+        user = self.get_current_user()
+        if not user:
+            self.render('login.html')
+
+    def get_current_user(self):
+        return self.session.get('user')
 
     @property
     def db(self):

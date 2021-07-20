@@ -7,6 +7,9 @@ from tornado import gen
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
+import tornado.web
+from pycket.session import SessionMixin
+
 import web.base as webBase
 import libs.database as database
 
@@ -16,7 +19,10 @@ class Application(tornado.web.Application):
         handlers = [
             # 设置路由
             (r"/", HomeHandler),
-            (r"/test",TestHandler),
+            (r"/test", TestHandler),
+            (r"/login.html", LoginHandler),
+            (r"/nologin", NologinHandler),
+            (r"/send", SendHandler),
         ]
         settings = dict(  # 配置
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
@@ -25,6 +31,25 @@ class Application(tornado.web.Application):
             # cookie加密
             cookie_secret="027asdb67090df0392c2da87092z8a17b58b7",
             debug=True,
+
+            blog_title="password01 - tornado",
+            login_url="/login.html",
+            # 1 配置pycket 注意别忘记开启redis服务C:\redis>redis-server.exe
+            pycket={
+                'engine': 'redis',
+                'storage': {
+                    'host': 'localhost',
+                    'port': 6379,
+                    'db_sessions': 2,
+                    # 'password': '',
+                    'db_notifications': 11,
+                    'max_connections': 2 ** 31,
+                },
+                'cookies': {
+                    'expires_days': 30,
+                    'max_age': 5000
+                }
+            },
         )
         super(Application, self).__init__(handlers, **settings)
         # Have one global connection to the blog DB across all handlers
@@ -36,17 +61,52 @@ class HomeHandler(webBase.BaseHandler):
     @gen.coroutine
     def get(self):
 
-        sql1 = "select * from users"
-        list1 = self.db.query(sql1)
+        # sql1 = "select * from users"
+        # list1 = self.db.query(sql1)
 
-        self.render("index.html", entries="hello", data=self.db.get("select * from users where id='2'"), list=list1)
+        # self.render("index.html", entries="hello", data=self.db.get(
+        #     "select * from users where id='2'"), list=list1)
+        name = self.get_current_user()
+        self.write("hello %s" % (name))
+
+
+class LoginHandler(tornado.web.RequestHandler, SessionMixin):
+    def get(self, *args, **kwargs):
+        self.render("login.html")
+
+    def post(self, *args, **kwargs):
+        # TODO user password
+        self.set_secure_cookie('user', self.get_argument('user', None))
+        # 4设置session
+        self.session.set('user', self.get_argument('user'))
+
 
 class TestHandler(webBase.BaseHandler):
     @gen.coroutine
     def get(self):
-        self.session['name'] = 'jack'
+        name = 'jack123'
+        self.session.set('cookie_name', name)
+        self.write('success login')
+        print(self.session.get('cookie_name'))
 
-        print(self.session['name'])
+
+class NologinHandler(webBase.BaseHandler):
+    @tornado.web.authenticated
+    def get(self):
+        self.write('this message is secrect')
+
+
+class LogoutHandler(webBase.BaseHandler):
+    @gen.coroutine
+    def get(self):
+        self.session.set('user', "")
+
+
+class SendHandler(tornado.web.RequestHandler):
+    def post(self):
+        code = '12345'
+        self.write(code)
+
 
 def main():
     tornado.options.parse_command_line()
