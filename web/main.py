@@ -12,7 +12,7 @@ from pycket.session import SessionMixin
 
 import web.base as webBase
 import libs.database as database
-
+from libs.send import Send
 
 class Application(tornado.web.Application):
     def __init__(self):
@@ -107,14 +107,18 @@ class LogoutHandler(webBase.BaseHandler):
         self.session.set('user', "")
 
 
-class SendHandler(tornado.web.RequestHandler):
+class SendHandler(webBase.BaseHandler):
     """
         send email
     """
     def post(self):
-        code = '1'
-        print(self.get_body_argument('action',''))
-        self.write({'code': code})
+        code = Send.email()
+        if code:
+            sql = "insert into code(uid, code,createtime) values(%s, %s, %s) ; " %(1, code , '123456789')
+            self.db.execute(sql)
+            self.write({'code':'1'})
+        else:
+            self.write({'code':0})
 
 
 def main():

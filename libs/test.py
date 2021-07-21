@@ -1,12 +1,12 @@
 import database
 from common import Common
-
+from send import Send
 # can either specify a db file or use in-memory if no params provided
 # conn = database_sqlite3.ConnectionSqlite3("test.db")
 #
 
 # conn = database.Connection(":memory:")
-conn = database.Connection("../password01.db")
+# conn = database.Connection("../password01.db")
 
 #
 # create a table and insert sample data
@@ -33,6 +33,6 @@ conn = database.Connection("../password01.db")
 #row = conn.get("select * from code where uid='1'")
 #print(row['code'])
 
-salt = Common.ranstr(8)
+salt = Send()
 
 print(salt)
