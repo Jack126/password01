@@ -27,7 +27,7 @@ class Application(tornado.web.Application):
         settings = dict(  # 配置
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
-            xsrf_cookies=False,  # True,
+            xsrf_cookies=True,  # True,
             # cookie加密
             cookie_secret="027asdb67090df0392c2da87092z8a17b58b7",
             debug=True,
@@ -57,7 +57,7 @@ class Application(tornado.web.Application):
 
 
 # 首页handler
-class HomeHandler(webBase.BaseHandler):
+class HomeHandler(tornado.web.RequestHandler):
     @gen.coroutine
     def get(self):
 
@@ -66,12 +66,14 @@ class HomeHandler(webBase.BaseHandler):
 
         # self.render("index.html", entries="hello", data=self.db.get(
         #     "select * from users where id='2'"), list=list1)
-        name = self.get_current_user()
-        self.write("hello %s" % (name))
+        # name = self.get_current_user()
+        # self.write("hello %s" % (name))
+        print(self.request.headers["User-Agent"])
 
 
 class LoginHandler(tornado.web.RequestHandler, SessionMixin):
     def get(self, *args, **kwargs):
+        self.xsrf_token
         self.render("login.html")
 
     def post(self, *args, **kwargs):
@@ -97,15 +99,22 @@ class NologinHandler(webBase.BaseHandler):
 
 
 class LogoutHandler(webBase.BaseHandler):
+    """
+        logout function
+    """
     @gen.coroutine
     def get(self):
         self.session.set('user', "")
 
 
 class SendHandler(tornado.web.RequestHandler):
+    """
+        send email
+    """
     def post(self):
-        code = '12345'
-        self.write(code)
+        code = '1'
+        print(self.get_body_argument('action',''))
+        self.write({'code': code})
 
 
 def main():

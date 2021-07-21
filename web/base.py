@@ -3,7 +3,7 @@
 
 import tornado.web
 from pycket.session import SessionMixin
-#基础handler，主要负责检查sqlite的数据库链接。
+# 基础handler，主要负责检查sqlite的数据库链接。
 
 
 class BaseHandler(tornado.web.RequestHandler, SessionMixin):

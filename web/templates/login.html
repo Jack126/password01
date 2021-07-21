@@ -12,6 +12,7 @@
 <body>
 	<div class="layui-container">
 		<form class="layui-form" action="">
+			{% module xsrf_form_html() %}
 			<div class="logoHead">
 			</div>
 			<div class="layui-form-item">
@@ -46,6 +47,7 @@
 
 	<script src="static/layui/layui.js"></script>
 	<script>
+		
 		layui.use('form', function () {
 			var form = layui.form;
 			form.verify({
@@ -70,17 +72,20 @@
 				return false;
 			});
 			$=layui.jquery;
+			function getCookie(name) {
+				var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+				return r ? r[1] : undefined;
+			}
+			xsrf = getCookie('_xsrf')
 			$(document).on('click','#btn',function(){
 				$.ajax({
                     url:'/send',
-                    data:{'action':'sendCode'},
+                    data:{'action':'sendCode','_xsrf':xsrf},
                     type:'post',
                     dataType:'json',
                     success:function (data){
-                        if(data.res == 1){
-                           
-                        }else{
-                            layer.alert(data.message);
+                        if(data.code == 1){
+                            layer.alert('验证码已发送');
                         }
                     }
                 });
