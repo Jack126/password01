@@ -24,3 +24,4 @@ class BaseHandler(tornado.web.RequestHandler, SessionMixin):
             print(e)
             self.application.db.reconnect()
         return self.application.db
+    

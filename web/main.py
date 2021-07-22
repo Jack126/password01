@@ -8,11 +8,14 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.options
 import tornado.web
+import json
 from pycket.session import SessionMixin
 
 import web.base as webBase
 import libs.database as database
 from libs.send import Send
+from libs.common import Common
+
 
 class Application(tornado.web.Application):
     def __init__(self):
@@ -27,7 +30,7 @@ class Application(tornado.web.Application):
         settings = dict(  # 配置
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
-            xsrf_cookies=True,  # True,
+            xsrf_cookies=False,  # True,
             # cookie加密
             cookie_secret="027asdb67090df0392c2da87092z8a17b58b7",
             debug=True,
@@ -77,10 +80,20 @@ class LoginHandler(tornado.web.RequestHandler, SessionMixin):
         self.render("login.html")
 
     def post(self, *args, **kwargs):
+        name = self.get_body_arguments('name', '')
+        password = self.get_body_arguments('password', '')
+        code = self.get_body_arguments('code', '')
+        if not name:
+            self.write({'code': 0, 'message': 'params error'})
+        db = database.Connection("password01.db")
+        sql = "select * from users where name= ? ;"
+        row = db.get(sql, (name,))
+        print(row)
+        self.write({'code': 1, 'data': name})
         # TODO user password
-        self.set_secure_cookie('user', self.get_argument('user', None))
+        #self.set_secure_cookie('user', self.get_argument('user', None))
         # 4设置session
-        self.session.set('user', self.get_argument('user'))
+        #@self.session.set('user', self.get_argument('user'))
 
 
 class TestHandler(webBase.BaseHandler):
@@ -113,12 +126,14 @@ class SendHandler(webBase.BaseHandler):
     """
     def post(self):
         code = Send.email()
-        if code:
-            sql = "insert into code(uid, code,createtime) values(%s, %s, %s) ; " %(1, code , '123456789')
-            self.db.execute(sql)
-            self.write({'code':'1'})
-        else:
-            self.write({'code':0})
+        if not code:
+            self.write({'code': 0})
+        try:
+            sql = "insert into code(uid, code,createtime) values(?, ?, ?);"
+            self.db.execute(sql, 1, code, Common.getTime())
+        except Exception as e:
+            print(e)
+        self.write({'code': 1})
 
 
 def main():

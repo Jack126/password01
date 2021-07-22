@@ -11,7 +11,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
 """A lightweight wrapper around SQLite3."""
 
 import sqlite3
@@ -20,8 +19,8 @@ import itertools
 import logging
 import time
 
-class Connection(object):
 
+class Connection(object):
     """A lightweight wrapper around Sqlite3 connections.
     The main value we provide is wrapping rows in a dict/object so that
     columns can be accessed by name. Typical usage:
@@ -33,21 +32,24 @@ class Connection(object):
     We explicitly set the timezone to UTC and the character encoding to
     UTF-8 on all connections to avoid time zone and encoding errors.
     """
-
-
-    def __init__(self, database=":memory:", host="localhost", user=None, password=None, max_idle_time=7*3600):
+    def __init__(self,
+                 database=":memory:",
+                 host="localhost",
+                 user=None,
+                 password=None,
+                 max_idle_time=7 * 3600):
         self.host = host
         self.database = database
         self.max_idle_time = max_idle_time
 
-        #args = dict(db=database)
         self._db = None
-        #self._db_args = args
         self._last_use_time = time.time()
         try:
             self.reconnect()
         except:
-            logging.error("Cannot connect to Sqlite3 on %s", self.host, exc_info=True)
+            logging.error("Cannot connect to Sqlite3 on %s",
+                          self.host,
+                          exc_info=True)
 
     def __del__(self):
         self.close()
@@ -65,7 +67,7 @@ class Connection(object):
         """Closes the existing database connection and re-opens it."""
         self.close()
         self._db = sqlite3.connect(self.database)
-        self.isolation_level = None    # similar to mysql self._db.autocommit(True)
+        self.isolation_level = None  # similar to mysql self._db.autocommit(True)
 
     def iter(self, query, *parameters):
         """Returns an iterator for the given query and parameters."""
@@ -122,8 +124,8 @@ class Connection(object):
     def _ensure_connected(self):
         # if  coonection has been idle for too long (7 hours by default).
         # pre-emptive
-        if (self._db is None or
-            (time.time() - self._last_use_time > self.max_idle_time)):
+        if (self._db is None
+                or (time.time() - self._last_use_time > self.max_idle_time)):
             self.reconnect()
         self._last_use_time = time.time()
 
@@ -150,10 +152,10 @@ class Row(dict):
         except KeyError:
             raise AttributeError(name)
 
+
 # Alias some common Sqlite3 exceptions
 IntegrityError = sqlite3.IntegrityError
 OperationalError = sqlite3.OperationalError
-
 
 #
 # Havent ported field-types over from Mysql to Sqlite3

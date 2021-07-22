@@ -9,18 +9,18 @@ import random
 
 class Send():
     def email():
-        mail_host = "smtp.aliyun.com" # mail smtp host
+        mail_host = "smtp.aliyun.com"  # mail smtp host
         mail_user = ""  # username
         mail_pass = ""  # password
 
-        sender = ""   # send email
+        sender = ""  # send email
         receivers = ['']  # receive email
-        
+
         code = Common.ranstr(8)
         mess = 'Your number is : ' + code
         message = MIMEText(mess, 'plain', 'utf-8')
-        message['From'] = Header("", 'utf-8') # from@aliyun.com
-        message['To'] = Header("", 'utf-8') # to@aliyun.com
+        message['From'] = Header("", 'utf-8')  # from@aliyun.com
+        message['To'] = Header("", 'utf-8')  # to@aliyun.com
 
         subject = 'Your number'
         message['Subject'] = Header(subject, 'utf-8')

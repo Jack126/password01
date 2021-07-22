@@ -2,97 +2,97 @@
 <html>
 
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<title>登录-password01</title>
-	<link rel="stylesheet" href="static/layui/css/layui.css">
-	<link rel="stylesheet" href="static/layui/css/login.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>登录-password01</title>
+    <link rel="stylesheet" href="static/layui/css/layui.css">
+    <link rel="stylesheet" href="static/layui/css/login.css">
 </head>
 
 <body>
-	<div class="layui-container">
-		<form class="layui-form" action="">
-			{% module xsrf_form_html() %}
-			<div class="logoHead">
-			</div>
-			<div class="layui-form-item">
-				<label class="layui-form-label">用户名</label>
-				<div class="layui-input-block">
-					<input type="text" name="name" required lay-verify="name" placeholder="请输入标题" autocomplete="off"
-						class="layui-input">
-				</div>
-			</div>
-			<div class="layui-form-item">
-				<label class="layui-form-label">密码</label>
-				<div class="layui-input-inline">
-					<input type="password" name="password" required lay-verify="pass" placeholder="请输入密码"
-						autocomplete="off" class="layui-input">
-				</div>
-			</div>
-			<div class="layui-form-item">
-				<label class="layui-form-label">验证码</label>
-				<div class="layui-input-block">
-					<input type="text" name="code" required lay-verify="code" placeholder="请输入标题"
-						autocomplete="off" class="layui-input">
-				</div>
-			</div>
-			<div class="layui-form-item">
-				<div class="layui-input-block">
-					<button class="layui-btn" lay-submit lay-filter="formDemo">登录</button>
-					<button class="layui-btn layui-btn-primary" id="btn" type="button">发送验证码</button>
-				</div>
-			</div>
-		</form>
-	</div>
+    <div class="layui-container">
+        <form class="layui-form" action="/login.html" method="POST">
+            {% module xsrf_form_html() %}
+            <div class="logoHead">
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">用户名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="name" required lay-verify="name" placeholder="请输入标题" autocomplete="off"
+                        class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">密码</label>
+                <div class="layui-input-inline">
+                    <input type="password" name="password" required lay-verify="pass" placeholder="请输入密码"
+                        autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">验证码</label>
+                <div class="layui-input-block">
+                    <input type="text" name="code" required lay-verify="code" placeholder="请输入标题" autocomplete="off"
+                        class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="formDemo">登录</button>
+                    <button class="layui-btn layui-btn-primary" id="btn" type="button">发送验证码</button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-	<script src="static/layui/layui.js"></script>
-	<script>
-		
-		layui.use('form', function () {
-			var form = layui.form;
-			form.verify({
-				name: function (value) {
-					if (value.length < 5) {
-						return '用户名至少得5个字符啊';
-					}
-				}
-				, pass: [
-					/^[\S]{6,12}$/
-					, '密码必须6到12位，且不能出现空格'
-				]
-				, code: function (value) {
-					if (value.length < 5) {
-						return '验证码至少得6个字符啊';
-					}
-				}
-			});
-			//监听提交
-			form.on('submit(formDemo)', function (data) {
-				layer.msg(JSON.stringify(data.field));
-				return false;
-			});
-			$=layui.jquery;
-			function getCookie(name) {
-				var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
-				return r ? r[1] : undefined;
-			}
-			xsrf = getCookie('_xsrf')
-			$(document).on('click','#btn',function(){
-				$.ajax({
-                    url:'/send',
-                    data:{'action':'sendCode','_xsrf':xsrf},
-                    type:'post',
-                    dataType:'json',
-                    success:function (data){
-                        if(data.code == 1){
+    <script src="static/layui/layui.js"></script>
+    <script>
+
+        layui.use('form', function () {
+            var form = layui.form;
+            form.verify({
+                name: function (value) {
+                    if (value.length < 5) {
+                        return '用户名至少得5个字符啊';
+                    }
+                }
+                , pass: [
+                    /^[\S]{6,12}$/
+                    , '密码必须6到12位，且不能出现空格'
+                ]
+                , code: function (value) {
+                    if (value.length < 5) {
+                        return '验证码至少得6个字符啊';
+                    }
+                }
+            });
+            //监听提交
+            form.on('submit(formDemo)', function (data) {
+                layer.msg(JSON.stringify(data.field));
+                //return false;
+            });
+            $ = layui.jquery;
+            function getCookie(name) {
+                var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+                return r ? r[1] : undefined;
+            }
+            xsrf = getCookie('_xsrf')
+            $(document).on('click', '#btn', function () {
+                $.ajax({
+                    url: '/send',
+                    data: { 'action': 'sendCode', '_xsrf': xsrf },
+                    type: 'post',
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.code == 1) {
                             layer.alert('验证码已发送');
                         }
                     }
                 });
-			});
+            });
 
-		});
-	</script>
+        });
+    </script>
 </body>
 
 </html>
