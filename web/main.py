@@ -30,7 +30,7 @@ class Application(tornado.web.Application):
         settings = dict(  # 配置
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
-            xsrf_cookies=False,  # True,
+            xsrf_cookies=True,  # True,
             # cookie加密
             cookie_secret="027asdb67090df0392c2da87092z8a17b58b7",
             debug=True,
@@ -90,7 +90,7 @@ class LoginHandler(tornado.web.RequestHandler, SessionMixin):
         row = db.get(sql, (name,))
         print(row)
         self.write({'code': 1, 'data': name})
-        # TODO user password
+        # //TODO user password
         #self.set_secure_cookie('user', self.get_argument('user', None))
         # 4设置session
         #@self.session.set('user', self.get_argument('user'))
@@ -120,17 +120,21 @@ class LogoutHandler(webBase.BaseHandler):
         self.session.set('user', "")
 
 
-class SendHandler(webBase.BaseHandler):
+class SendHandler(tornado.web.RequestHandler):
     """
-        send email
+        send user email
     """
     def post(self):
-        code = Send.email()
+        name = self.get_body_arguments('name','')
+        if not name:
+            self.write({'code': 0})
+        db = database.Connection('password01.db')
+        code, uid = Send.email(db, str(name[0]))
         if not code:
             self.write({'code': 0})
         try:
             sql = "insert into code(uid, code,createtime) values(?, ?, ?);"
-            self.db.execute(sql, 1, code, Common.getTime())
+            db.execute(sql, uid, code, Common.getTime())
         except Exception as e:
             print(e)
         self.write({'code': 1})
@@ -142,7 +146,6 @@ def main():
     port = 9999
     http_server.listen(port)
     tornado.options.parse_command_line()
-
     tornado.ioloop.IOLoop.current().start()
 
 

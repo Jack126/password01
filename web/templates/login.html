@@ -18,8 +18,8 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">用户名</label>
                 <div class="layui-input-block">
-                    <input type="text" name="name" required lay-verify="name" placeholder="请输入标题" autocomplete="off"
-                        class="layui-input">
+                    <input type="text" id="name" name="name" required lay-verify="name" placeholder="请输入标题"
+                        autocomplete="off" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
@@ -78,9 +78,10 @@
             }
             xsrf = getCookie('_xsrf')
             $(document).on('click', '#btn', function () {
+                var name = $("#name").val();
                 $.ajax({
                     url: '/send',
-                    data: { 'action': 'sendCode', '_xsrf': xsrf },
+                    data: { 'action': 'sendCode', '_xsrf': xsrf, 'name': name },
                     type: 'post',
                     dataType: 'json',
                     success: function (data) {

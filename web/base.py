@@ -7,13 +7,13 @@ from pycket.session import SessionMixin
 
 
 class BaseHandler(tornado.web.RequestHandler, SessionMixin):
-    #def initialize(self):
-     #   user = self.get_current_user()
-        #if not user:
-        #    self.render('login.html')
+    def initialize(self):
+        user = self.get_current_user()
+        if not user:
+           self.render('login.html')
 
-    #def get_current_user(self):
-    #    return self.session.get('user')
+    def get_current_user(self):
+       return self.session.get('user')
 
     @property
     def db(self):
