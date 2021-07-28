@@ -106,7 +106,7 @@ class LoginHandler(webBase.BaseHandler):
         # user password
         self.set_secure_cookie('user', name)
         # session
-        self.session.set('user', name + '=' + user['id'])
+        self.session.set('user', name + '=' + str(user['id']))
         return self.write({'code': 1})
 
 
@@ -159,14 +159,13 @@ class AccountHandler(webBase.BaseHandler):
     """
     @tornado.web.authenticated
     def get(self):
-        # user = self.get_current_user()
-        # u = user.split('=')
-        # uid = u[1]
-        uid = 1
+        user = self.get_current_user()
+        u = user.split('=')
+        uid = u[1]
         sql = "select * from account where uid= ? ;"
         data = self.db.query(sql, uid)
         print(data)
-        #  self.render("account.html", data=data)
+        self.render("account.html", data=data, title=self.settings['blog_title'])
 
 
 def main():
