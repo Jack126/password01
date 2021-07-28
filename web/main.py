@@ -8,7 +8,6 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.options
 import tornado.web
-from pycket.session import SessionMixin
 import web.base as webBase
 import libs.database as database
 from libs.send import Send
@@ -18,15 +17,17 @@ from libs.common import Common
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
-            # 设置路由
-            (r"/", HomeHandler),
+            # set route
+            (r"/nologin", NologinHandler),
             (r"/test", TestHandler),
+
+            (r"/", HomeHandler),
             (r"/login.html", LoginHandler),
             (r"/logout", LogoutHandler),
-            (r"/nologin", NologinHandler),
             (r"/send", SendHandler),
+            (r"/account", AccountHandler),
         ]
-        settings = dict(  # 配置
+        settings = dict(
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
             xsrf_cookies=True,  # True,
@@ -37,7 +38,7 @@ class Application(tornado.web.Application):
             blog_title="password01 - tornado",
             login_url="/login.html",
             salt="PassWord01",
-            # 1 配置pycket 注意别忘记开启redis服务C:\redis>redis-server.exe
+            # 1 配置pycket 注意别忘记开启redis服务
             pycket={
                 'engine': 'redis',
                 'storage': {
@@ -63,13 +64,14 @@ class Application(tornado.web.Application):
 class HomeHandler(webBase.BaseHandler):
     @tornado.web.authenticated
     def get(self):
-        self.write(self.settings['blog_title'])
+        # self.write(self.settings['blog_title'])
         # sql1 = "select * from users"
         # list1 = self.db.query(sql1)
 
         # self.render("index.html", entries="hello", data=self.db.get(
         #     "select * from users where id='2'"), list=list1)
-        # name = self.get_current_user()
+        name = self.get_current_user()
+        self.write(name)
         # self.write("hello %s" % (name))
         # print(self.request.headers["User-Agent"])
 
@@ -104,7 +106,7 @@ class LoginHandler(webBase.BaseHandler):
         # user password
         self.set_secure_cookie('user', name)
         # session
-        self.session.set('user', name)
+        self.session.set('user', name + '=' + user['id'])
         return self.write({'code': 1})
 
 
@@ -127,7 +129,7 @@ class LogoutHandler(webBase.BaseHandler):
     """
         logout function
     """
-    @gen.coroutine
+    @tornado.web.authenticated
     def get(self):
         self.session.set('user', "")
 
@@ -149,6 +151,22 @@ class SendHandler(webBase.BaseHandler):
         except Exception as e:
             print(e)
         self.write({'code': 1})
+
+
+class AccountHandler(webBase.BaseHandler):
+    """
+        list account
+    """
+    @tornado.web.authenticated
+    def get(self):
+        # user = self.get_current_user()
+        # u = user.split('=')
+        # uid = u[1]
+        uid = 1
+        sql = "select * from account where uid= ? ;"
+        data = self.db.query(sql, uid)
+        print(data)
+        #  self.render("account.html", data=data)
 
 
 def main():
