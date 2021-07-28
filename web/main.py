@@ -8,9 +8,7 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.options
 import tornado.web
-import json
 from pycket.session import SessionMixin
-
 import web.base as webBase
 import libs.database as database
 from libs.send import Send
@@ -24,6 +22,7 @@ class Application(tornado.web.Application):
             (r"/", HomeHandler),
             (r"/test", TestHandler),
             (r"/login.html", LoginHandler),
+            (r"/logout", LogoutHandler),
             (r"/nologin", NologinHandler),
             (r"/send", SendHandler),
         ]
@@ -37,6 +36,7 @@ class Application(tornado.web.Application):
 
             blog_title="password01 - tornado",
             login_url="/login.html",
+            salt="PassWord01",
             # 1 配置pycket 注意别忘记开启redis服务C:\redis>redis-server.exe
             pycket={
                 'engine': 'redis',
@@ -60,10 +60,10 @@ class Application(tornado.web.Application):
 
 
 # 首页handler
-class HomeHandler(tornado.web.RequestHandler):
-    @gen.coroutine
+class HomeHandler(webBase.BaseHandler):
+    @tornado.web.authenticated
     def get(self):
-
+        self.write(self.settings['blog_title'])
         # sql1 = "select * from users"
         # list1 = self.db.query(sql1)
 
@@ -71,29 +71,41 @@ class HomeHandler(tornado.web.RequestHandler):
         #     "select * from users where id='2'"), list=list1)
         # name = self.get_current_user()
         # self.write("hello %s" % (name))
-        print(self.request.headers["User-Agent"])
+        # print(self.request.headers["User-Agent"])
 
 
-class LoginHandler(tornado.web.RequestHandler, SessionMixin):
+class LoginHandler(webBase.BaseHandler):
     def get(self, *args, **kwargs):
         self.xsrf_token
-        self.render("login.html")
+        self.render("login.html", title=self.settings['blog_title'])
 
     def post(self, *args, **kwargs):
-        name = self.get_body_arguments('name', '')
-        password = self.get_body_arguments('password', '')
-        code = self.get_body_arguments('code', '')
-        if not name:
-            self.write({'code': 0, 'message': 'params error'})
-        db = database.Connection("password01.db")
+        name = self.get_argument('name', None)
+        password = self.get_argument('password', None)
+        code = self.get_argument('code', None)
+        if not name or not password or not code:
+            return self.write({'code': 0, 'message': 'params error'})
         sql = "select * from users where name= ? ;"
-        row = db.get(sql, (name,))
-        print(row)
-        self.write({'code': 1, 'data': name})
-        # //TODO user password
-        #self.set_secure_cookie('user', self.get_argument('user', None))
-        # 4设置session
-        #@self.session.set('user', self.get_argument('user'))
+        user = self.db.get(sql, str(name))
+        if not user:
+            return self.write({'code': 0})
+        # check code
+        sql = "select * from code where uid=? order by createtime desc limit 1;"
+        row = self.db.get(sql, str(user['id']))
+        if not row:
+            return self.write({'code': 0})
+        if str(code) != row['code']:
+            return self.write({'code': 102})
+        pwd = Common.getMd5(str(password), str(self.settings['salt']))
+        if pwd != user['password']:
+            return self.write({'code': 0})
+        # delete code
+        self.db.execute("delete from code where uid=?", str(user['id']))
+        # user password
+        self.set_secure_cookie('user', name)
+        # session
+        self.session.set('user', name)
+        return self.write({'code': 1})
 
 
 class TestHandler(webBase.BaseHandler):
@@ -120,21 +132,20 @@ class LogoutHandler(webBase.BaseHandler):
         self.session.set('user', "")
 
 
-class SendHandler(tornado.web.RequestHandler):
+class SendHandler(webBase.BaseHandler):
     """
         send user email
     """
     def post(self):
-        name = self.get_body_arguments('name','')
+        name = self.get_argument('name', None)
         if not name:
             self.write({'code': 0})
-        db = database.Connection('password01.db')
-        code, uid = Send.email(db, str(name[0]))
+        code, uid = Send.email(self.db, str(name))
         if not code:
             self.write({'code': 0})
         try:
             sql = "insert into code(uid, code,createtime) values(?, ?, ?);"
-            db.execute(sql, uid, code, Common.getTime())
+            self.db.execute(sql, uid, code, Common.getTime())
         except Exception as e:
             print(e)
         self.write({'code': 1})

@@ -14,8 +14,6 @@
 """A lightweight wrapper around SQLite3."""
 
 import sqlite3
-import copy
-import itertools
 import logging
 import time
 
@@ -46,7 +44,7 @@ class Connection(object):
         self._last_use_time = time.time()
         try:
             self.reconnect()
-        except:
+        except Exception:
             logging.error("Cannot connect to Sqlite3 on %s",
                           self.host,
                           exc_info=True)
