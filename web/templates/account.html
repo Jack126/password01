@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -10,8 +10,11 @@
     <link href="static/css/common.css" rel="stylesheet">
 </head>
 
-<body class="bg-light">
-    <div class="t-25 container-fluid bg-body">
+<body>
+    <div class="t-10 text-center">
+        <img src="static/imgs/logo.png" class="img-fluid" alt="password01">
+    </div>
+    <div class="t-15 container-fluid bg-body">
         <div class="accordion accordion-flush" id="accordionFlushExample">
             {% for row in data %}
             <div class="accordion-item">
@@ -24,16 +27,16 @@
                 </h2>
                 <div id="flush-collapse{{ row['id'] }}" class="accordion-collapse collapse"
                     aria-labelledby="flush-head{{ row['id'] }}" data-bs-parent="#accordionFlushExample">
-                    <div class="accordion-body">username: {{ row['username'] }} <br /> password: {{ row['password'] }}
+                    <div class="accordion-body">
+                        username: {{ row['username'] }} <br />
+                        password: {{ row['password'] }}
                     </div>
                 </div>
             </div>
             {% end %}
-
         </div>
     </div>
 </body>
 <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
 <script src="static/dist/js/bootstrap.bundle.min.js"></script>
-
 </html>

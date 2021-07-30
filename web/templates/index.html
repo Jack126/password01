@@ -1,2 +1,40 @@
-{{ data }}
-{{ list }}
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{ title }}">
+    <title>{{ title }}</title>
+    <link href="static/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/css/common.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="t-10 text-center">
+        <img src="static/imgs/logo.png" class="img-fluid" alt="password01">
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Account</h5>
+              <p class="card-text">Show your personal accounts information.</p>
+              <a href="/account.html" class="btn btn-primary">Go Account</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Setting</h5>
+              <p class="card-text">Set up your personal information.</p>
+              <a href="/setting.html" class="btn btn-primary">Go Setting</a>
+            </div>
+          </div>
+        </div>
+      </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="static/dist/js/bootstrap.bundle.min.js"></script>
+</html>

@@ -18,18 +18,18 @@
         <form onsubmit="return false">
             {% module xsrf_form_html() %}
             <div class="t-15"></div>
-            <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+            <h1 class="h3 mb-3 fw-normal">change your password</h1>
             <div class="form-floating">
-                <input type="text" class="form-control" id="floatingInput" placeholder="name">
-                <label for="floatingInput">Username</label>
+                <input type="password" class="form-control" id="floatingInput" placeholder="Old password">
+                <label for="floatingInput">Old password</label>
             </div>
             <div class="form-floating">
-                <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-                <label for="floatingPassword">Password</label>
+                <input type="password" class="form-control" id="floatingPassword" placeholder="New password">
+                <label for="floatingPassword">New password</label>
             </div>
             <div class="form-floating">
-                <input type="text" class="form-control" id="floatingInput1" placeholder="code">
-                <label for="floatingInput1">Code</label>
+                <input type="password" class="form-control" id="floatingInput1" placeholder="Confirm password">
+                <label for="floatingInput1">Confirm password</label>
             </div>
             <div class="t-15">
                 <div class="alert alert-danger alert-dismissible fade show hidden alert0" role="alert">
@@ -38,8 +38,7 @@
                 </div>
             </div>
             <div class="form-floating">
-                <button class="btn btn-lg btn-primary" type="submit" id="submit">Login</button>
-                <button class="btn btn-lg btn-warning" type="button" id="sendcode">Send Code</button>
+                <button class="btn btn-lg btn-primary" type="submit" id="submit">Submit</button>
             </div>
         </form>
     </main>
@@ -49,72 +48,49 @@
 <script src="static/js/common.js"></script>
 <script>
     $(document).ready(function () {
-        $("#sendcode").click(function () {
-            xsrf = getCookie('_xsrf')
-            var name = $("#floatingInput").val();
-            if(name == "" || name == undefined){
-                $(".alert0").html('Please check your name');
-                $(".alert0").show()
-                $(".alert0").hide(3000)
-                return false;
-            }
-            $.ajax({
-                url: '/send.html',
-                data: { 'action': 'sendCode', '_xsrf': xsrf, 'name': name },
-                type: 'post',
-                dataType: 'json',
-                success: function (data) {
-                    if (data.code == 1) {
-                        $(".alert1").html('The code is send');
-                        $(".alert1").show()
-                        $(".alert1").hide(2000)
-                    }
-                },
-                error: function () {
-                    $(".alert0").html('Something is error');
-                    $(".alert0").show()
-                    $(".alert0").hide(3000)
-                }
-            });
-        });
-
         $("#submit").click(function () {
             xsrf = getCookie('_xsrf')
             var name = $("#floatingInput").val();
             var password = $("#floatingPassword").val();
             var code = $("#floatingInput1").val();
             if(name == "" || name == undefined){
-                $(".alert0").html('Please check your name');
+                $(".alert0").html('Please check your old password');
                 $(".alert0").show()
                 $(".alert0").hide(3000)
                 return false;
             }
             if(password == "" || password == undefined){
-                $(".alert0").html('Please check your password');
+                $(".alert0").html('Please check your new password');
                 $(".alert0").show()
                 $(".alert0").hide(3000)
                 return false;
             }
             if(code == "" || code == undefined){
-                $(".alert0").html('Please check your code');
+                $(".alert0").html('Please check your confirm password');
+                $(".alert0").show()
+                $(".alert0").hide(3000)
+                return false;
+            }
+            if(password!=code){
+                $(".alert0").html('Please check your new password or confirm password');
                 $(".alert0").show()
                 $(".alert0").hide(3000)
                 return false;
             }
             $.ajax({
-                url: '/login.html',
+                url: '/setting.html',
                 type: 'post',
                 dataType: 'json',
                 contentType: "application/x-www-form-urlencoded",
-                data: { '_xsrf': xsrf, 'name': name, 'password': password, 'code': code },
+                data: { '_xsrf': xsrf, 'oldpassword': name, 'password': password, 'confirmpwd': code },
                 success: function (d) {
                     if(d.code==1){
-                        $(".alert1").html('Login success');
+                        $(".alert1").html('success');
                         $(".alert1").show()
                         $(".alert1").hide(2000)
                         location.href="/"
                     }else{
-                        $(".alert0").html('Something is error');
+                        $(".alert0").html(d.message);
                         $(".alert0").show()
                         $(".alert0").hide(3000)
                     }
@@ -127,4 +103,3 @@
         })
     });
 </script>
-</html>

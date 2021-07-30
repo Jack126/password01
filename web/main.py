@@ -18,14 +18,12 @@ class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             # set route
-            (r"/nologin", NologinHandler),
-            (r"/test", TestHandler),
-
             (r"/", HomeHandler),
             (r"/login.html", LoginHandler),
-            (r"/logout", LogoutHandler),
-            (r"/send", SendHandler),
-            (r"/account", AccountHandler),
+            (r"/logout.html", LogoutHandler),
+            (r"/send.html", SendHandler),
+            (r"/account.html", AccountHandler),
+            (r"/setting.html", SettingHandler),
         ]
         settings = dict(
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
@@ -34,7 +32,6 @@ class Application(tornado.web.Application):
             # cookie加密
             cookie_secret="027asdb67090df0392c2da87092z8a17b58b7",
             debug=True,
-
             blog_title="password01 - tornado",
             login_url="/login.html",
             salt="PassWord01",
@@ -47,7 +44,7 @@ class Application(tornado.web.Application):
                     'db_sessions': 2,
                     # 'password': '',
                     'db_notifications': 11,
-                    'max_connections': 2 ** 31,
+                    'max_connections': 2**31,
                 },
                 'cookies': {
                     'expires_days': 30,
@@ -60,26 +57,26 @@ class Application(tornado.web.Application):
         self.db = database.Connection("password01.db")
 
 
-# 首页handler
 class HomeHandler(webBase.BaseHandler):
+    """
+        home page
+    """
     @tornado.web.authenticated
     def get(self):
-        # self.write(self.settings['blog_title'])
-        # sql1 = "select * from users"
-        # list1 = self.db.query(sql1)
-
-        # self.render("index.html", entries="hello", data=self.db.get(
-        #     "select * from users where id='2'"), list=list1)
-        name = self.get_current_user()
-        self.write(name)
-        # self.write("hello %s" % (name))
-        # print(self.request.headers["User-Agent"])
+        self.render("index.html", title=self.settings['blog_title'])
 
 
 class LoginHandler(webBase.BaseHandler):
+    """
+        login page
+    """
     def get(self, *args, **kwargs):
         self.xsrf_token
         self.render("login.html", title=self.settings['blog_title'])
+
+    """
+        login post
+    """
 
     def post(self, *args, **kwargs):
         name = self.get_argument('name', None)
@@ -110,21 +107,6 @@ class LoginHandler(webBase.BaseHandler):
         return self.write({'code': 1})
 
 
-class TestHandler(webBase.BaseHandler):
-    @gen.coroutine
-    def get(self):
-        name = 'jack123'
-        self.session.set('cookie_name', name)
-        self.write('success login')
-        print(self.session.get('cookie_name'))
-
-
-class NologinHandler(webBase.BaseHandler):
-    @tornado.web.authenticated
-    def get(self):
-        self.write('this message is secrect')
-
-
 class LogoutHandler(webBase.BaseHandler):
     """
         logout function
@@ -141,16 +123,16 @@ class SendHandler(webBase.BaseHandler):
     def post(self):
         name = self.get_argument('name', None)
         if not name:
-            self.write({'code': 0})
+            return self.write({'code': 0})
         code, uid = Send.email(self.db, str(name))
         if not code:
-            self.write({'code': 0})
+            return self.write({'code': 0})
         try:
             sql = "insert into code(uid, code,createtime) values(?, ?, ?);"
             self.db.execute(sql, uid, code, Common.getTime())
         except Exception as e:
             print(e)
-        self.write({'code': 1})
+        return self.write({'code': 1})
 
 
 class AccountHandler(webBase.BaseHandler):
@@ -164,9 +146,43 @@ class AccountHandler(webBase.BaseHandler):
         uid = u[1]
         sql = "select * from account where uid= ? ;"
         data = self.db.query(sql, uid)
-        print(data)
-        self.render("account.html", data=data, title=self.settings['blog_title'])
+        self.render("account.html",
+                    data=data,
+                    title=self.settings['blog_title'])
 
+
+class SettingHandler(webBase.BaseHandler):
+    """
+        setting page
+    """
+    @tornado.web.authenticated
+    def get(self):
+        self.xsrf_token
+        self.render("setting.html", title=self.settings['blog_title'])
+
+    """
+        setting post
+    """
+
+    def post(self):
+        name = self.get_argument('oldpassword', None)
+        password = self.get_argument('password', None)
+        confirmpwd = self.get_argument('confirmpwd', None)
+        if not name or not password or not confirmpwd:
+            return self.write({'code': 0, 'message': 'params error'})
+        if(password != confirmpwd):
+            return self.write({'code': 0, 'message': 'The two passwords are inconsistent'})
+        user = self.get_current_user()
+        u = user.split('=')
+        uid = u[1]
+        sql = "select * from users where id= ? ;"
+        user = self.db.get(sql, int(uid))
+        if not user:
+            return self.write({'code': 0})
+        # check code
+        pwd = Common.getMd5(str(password), str(self.settings['salt']))
+        if pwd != user['password']:
+            return self.write({'code': 0})
 
 def main():
     tornado.options.parse_command_line()
