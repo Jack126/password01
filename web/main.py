@@ -3,7 +3,6 @@
 
 import os.path
 import tornado.escape
-from tornado import gen
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
@@ -170,19 +169,34 @@ class SettingHandler(webBase.BaseHandler):
         confirmpwd = self.get_argument('confirmpwd', None)
         if not name or not password or not confirmpwd:
             return self.write({'code': 0, 'message': 'params error'})
-        if(password != confirmpwd):
-            return self.write({'code': 0, 'message': 'The two passwords are inconsistent'})
+        if (password != confirmpwd):
+            return self.write({
+                'code': 0,
+                'message': 'The two passwords are inconsistent'
+            })
         user = self.get_current_user()
         u = user.split('=')
         uid = u[1]
         sql = "select * from users where id= ? ;"
         user = self.db.get(sql, int(uid))
         if not user:
-            return self.write({'code': 0})
+            return self.write({'code': 0, 'message': 'Empty user'})
         # check code
-        pwd = Common.getMd5(str(password), str(self.settings['salt']))
+        pwd = Common.getMd5(str(name), str(self.settings['salt']))
         if pwd != user['password']:
-            return self.write({'code': 0})
+            return self.write({'code': 0, 'message': 'Error password'})
+        if password != confirmpwd:
+            return self.write({
+                'code': 0,
+                'message': 'Two password is not same'
+            })
+
+        newpwd = Common.getMd5(str(password), str(self.settings['salt']))
+        sql = "update users set password= ? where id= ?;"
+        self.db.execute(sql, str(newpwd), int(uid))
+        self.session.set('user', "")
+        return self.write({'code': 1})
+
 
 def main():
     tornado.options.parse_command_line()

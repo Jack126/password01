@@ -22,23 +22,22 @@ class Send():
         receivers = [rec_email]  # receive email
 
         code = Common.ranstr(8)
-        return code, row['id']
-        # mess = 'Your number is : ' + code
-        # message = MIMEText(mess, 'plain', 'utf-8')
-        # message['From'] = Header("", 'utf-8')  # from@aliyun.com
-        # message['To'] = Header(rec_email, 'utf-8')  # to@aliyun.com
+        mess = 'Your number is : ' + code
+        message = MIMEText(mess, 'plain', 'utf-8')
+        message['From'] = Header("", 'utf-8')  # from@aliyun.com
+        message['To'] = Header(rec_email, 'utf-8')  # to@aliyun.com
 
-        # subject = 'Your number'
-        # message['Subject'] = Header(subject, 'utf-8')
+        subject = 'Your number'
+        message['Subject'] = Header(subject, 'utf-8')
 
-        # try:
-        #     smtpObj = smtplib.SMTP()
-        #     smtpObj.connect(mail_host, 25)  # 25 SMTP port
-        #     smtpObj.login(mail_user, mail_pass)
-        #     smtpObj.sendmail(sender, receivers, message.as_string())
-        #     return code, row['id']
-        # except smtplib.SMTPException:
-        #     return False
+        try:
+            smtpObj = smtplib.SMTP()
+            smtpObj.connect(mail_host, 25)  # 25 SMTP port
+            smtpObj.login(mail_user, mail_pass)
+            smtpObj.sendmail(sender, receivers, message.as_string())
+            return code, row['id']
+        except smtplib.SMTPException:
+            return False
 
 
 class Common():
