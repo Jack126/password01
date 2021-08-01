@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{ title }}">
+    <title>{{ title }}</title>
+    <link href="static/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/css/common.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="t-10 text-center">
+        <img src="static/imgs/logo.png" class="img-fluid" alt="password01">
+    </div>
+    <main class="form-signin text-center">
+        <form onsubmit="return false">
+            {% module xsrf_form_html() %}
+            <div class="t-15"></div>
+            <h1 class="h3 mb-3 fw-normal">Add your account</h1>
+            <div class="form-floating">
+                <input type="text" class="form-control" id="floatingInput" placeholder="Title">
+                <label for="floatingInput">Title</label>
+            </div>
+            <div class="form-floating">
+                <input type="text" class="form-control" id="floatingPassword" placeholder="Username">
+                <label for="floatingPassword">Username</label>
+            </div>
+            <div class="form-floating">
+                <input type="text" class="form-control" id="floatingInput1" placeholder="Password">
+                <label for="floatingInput1">Password</label>
+            </div>
+            <div class="t-15">
+                <div class="alert alert-danger alert-dismissible fade show hidden alert0" role="alert">
+                </div>
+                <div class="alert alert-success alert-dismissible fade show hidden alert1" role="alert">
+                </div>
+            </div>
+            <div class="form-floating">
+                <button class="btn btn-lg btn-primary" type="submit" id="submit">Add</button>
+            </div>
+        </form>
+    </main>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="static/dist/js/bootstrap.bundle.min.js"></script>
+<script src="static/js/common.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#submit").click(function () {
+            xsrf = getCookie('_xsrf')
+            var title = $("#floatingInput").val();
+            var username = $("#floatingPassword").val();
+            var pwd = $("#floatingInput1").val();
+            if (title == "" || title == undefined) {
+                $(".alert0").html('Please check your title');
+                $(".alert0").show()
+                $(".alert0").hide(3000)
+                return false;
+            }
+            if (username == "" || username == undefined) {
+                $(".alert0").html('Please check your username');
+                $(".alert0").show()
+                $(".alert0").hide(3000)
+                return false;
+            }
+            if (pwd == "" || pwd == undefined) {
+                $(".alert0").html('Please check your password');
+                $(".alert0").show()
+                $(".alert0").hide(3000)
+                return false;
+            }
+            $.ajax({
+                url: '/account.html',
+                type: 'post',
+                dataType: 'json',
+                contentType: "application/x-www-form-urlencoded",
+                data: { '_xsrf': xsrf, 'title': title, 'password': pwd, 'username': username },
+                success: function (d) {
+                    if (d.code == 1) {
+                        $(".alert1").html('success');
+                        $(".alert1").show()
+                        $(".alert1").hide(2000)
+                        location.href = "/"
+                    } else {
+                        $(".alert0").html(d.message);
+                        $(".alert0").show()
+                        $(".alert0").hide(3000)
+                    }
+                },
+                error: function () {
+                    $(".alert0").html('Something is error');
+                    $(".alert0").show()
+                }
+            })
+        })
+    });
+</script>

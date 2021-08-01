@@ -22,6 +22,7 @@ class Application(tornado.web.Application):
             (r"/logout.html", LogoutHandler),
             (r"/send.html", SendHandler),
             (r"/account.html", AccountHandler),
+            (r"/add.html", AddHandler),
             (r"/setting.html", SettingHandler),
         ]
         settings = dict(
@@ -133,6 +134,14 @@ class SendHandler(webBase.BaseHandler):
             print(e)
         return self.write({'code': 1})
 
+class AddHandler(webBase.BaseHandler):
+    """
+        add account
+    """
+    @tornado.web.authenticated
+    def get(self):
+        self.render("add.html", title=self.settings['blog_title'])
+
 
 class AccountHandler(webBase.BaseHandler):
     """
@@ -148,7 +157,23 @@ class AccountHandler(webBase.BaseHandler):
         self.render("account.html",
                     data=data,
                     title=self.settings['blog_title'])
-
+    
+    @tornado.web.authenticated
+    def post(self):
+        title = self.get_argument('title', None)
+        username = self.get_argument('username', None)
+        password = self.get_argument('password', None)
+        if not title or not password or not username:
+            return self.write({'code': 0, 'message': 'params error'}) 
+        user = self.get_current_user()
+        u = user.split('=')
+        uid = u[1]
+        try:
+            sql = "insert into account(uid,title,username,password) values(?,?,?,?);"
+            self.db.execute(sql, uid, title, username, password)
+        except Exception as e:
+            print(e)
+        return self.write({'code': 1})
 
 class SettingHandler(webBase.BaseHandler):
     """
