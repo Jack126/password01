@@ -11,6 +11,7 @@ import web.base as webBase
 import libs.database as database
 from libs.send import Send
 from libs.common import Common
+from libs.avatar import get_avatar_html
 
 
 class Application(tornado.web.Application):
@@ -134,6 +135,7 @@ class SendHandler(webBase.BaseHandler):
             print(e)
         return self.write({'code': 1})
 
+
 class AddHandler(webBase.BaseHandler):
     """
         add account
@@ -154,17 +156,19 @@ class AccountHandler(webBase.BaseHandler):
         uid = u[1]
         sql = "select * from account where uid= ? ;"
         data = self.db.query(sql, uid)
+        for i in data:
+            i['avatar'] = get_avatar_html(str(i['title']), 32)
         self.render("account.html",
                     data=data,
                     title=self.settings['blog_title'])
-    
+
     @tornado.web.authenticated
     def post(self):
         title = self.get_argument('title', None)
         username = self.get_argument('username', None)
         password = self.get_argument('password', None)
         if not title or not password or not username:
-            return self.write({'code': 0, 'message': 'params error'}) 
+            return self.write({'code': 0, 'message': 'params error'})
         user = self.get_current_user()
         u = user.split('=')
         uid = u[1]
@@ -174,6 +178,7 @@ class AccountHandler(webBase.BaseHandler):
         except Exception as e:
             print(e)
         return self.write({'code': 1})
+
 
 class SettingHandler(webBase.BaseHandler):
     """

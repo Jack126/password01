@@ -10,3 +10,12 @@
 .hidden {
     display: none;
 }
+.sa-avatar {
+    color: white;
+    text-align: center;
+    display: inline-block;
+    -ms-user-select:none;
+    -moz-user-select:none;
+    -webkit-user-select: none;
+    font-family: "Helvetica Neue",Arial,"Hiragino Sans GB","Hiragino Sans GB W3","Microsoft YaHei","Wenquanyi Micro Hei",sans-serif;
+}
