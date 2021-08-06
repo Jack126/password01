@@ -10,8 +10,13 @@ password01 项目是一个基于tornado web 开发的密码同步工具。该项
 ###### 3、sh web.sh
 
 
-#### 感谢 参考
-##### 文字生成图片 https://github.com/fy0/simple_avatar
+##### ps:
+
+邮箱需要自己申请开通pop3，填写收发地址(send.py)
+
+
+#### 感谢
+##### 文字生成图片参考 https://github.com/fy0/simple_avatar
 ##### 内网穿透 https://gitee.com/HServer/hp
 
 ## License
