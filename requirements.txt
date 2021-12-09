@@ -1,4 +1,2 @@
 pycket==0.3.0
-redis==3.5.3
 tornado==6.1
-torndb==0.3
